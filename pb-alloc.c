@@ -125,29 +125,33 @@ void init () {
  */
 void* malloc (size_t size) {
 
-  init();
+  init(); //initalize the heap
 
   if (size == 0) {
-    return NULL;
+    return NULL; //if block of zero size was requested, return null 
   }
 
-  size_t    total_size = size + sizeof(header_s);
-  header_s* header_ptr = (header_s*)free_addr;
-  void*     block_ptr  = (void*)(free_addr + sizeof(header_s));
+  size_t    total_size = size + sizeof(header_s); //calculate the total size allocated, which includes both header and the requested block
+  header_s* header_ptr = (header_s*)free_addr; //set the header pointer to the first free address in the heap
+  void*     block_ptr  = (void*)(free_addr + sizeof(header_s)); //calculate the block pointer using header size 
+  int align =(4 - (intptr_t)block_ptr %4)%4;
+  // DEBUG("remainder mod 4, offset:",(intptr_t) block_ptr%4 ,align);
+  header_ptr = (header_s*)(header_ptr+align);
+  block_ptr=(void*)(block_ptr+align);
+  intptr_t new_free_addr = free_addr + align  + total_size  ; //calculate the new free address to use for subsequent allocations
+  // DEBUG("allocation size: ",size);
+	if (new_free_addr > end_addr) {
 
-  intptr_t new_free_addr = free_addr + total_size;
-  if (new_free_addr > end_addr) {
-
-    return NULL;
+    return NULL; //if this new address exceeds the bounds of the heap, return an error
 
   } else {
 
-    free_addr = new_free_addr;
+    free_addr = new_free_addr; //else amend the free address pointer
 
   }
 
-  header_ptr->size = size;
-  return block_ptr;
+  header_ptr->size = size; //populate the size property of the header
+  return block_ptr; 
 
 } // malloc()
 // ==============================================================================
@@ -207,30 +211,31 @@ void* calloc (size_t nmemb, size_t size) {
  *
  * \param ptr  The block to be assigned a new size.
  * \param size The new size that the block should assume.
- * \return     A pointer to the resultant block, which may be `ptr` itself, or
+x \return     A pointer to the resultant block, which may be `ptr` itself, or
  *             may be a newly allocated block.
  */
 void* realloc (void* ptr, size_t size) {
 
   if (ptr == NULL) {
-    return malloc(size);
+    return malloc(size); //if no origin address is given, simply allocate new space
   }
 
   if (size == 0) {
     free(ptr);
-    return NULL;
+    return NULL; //if requested block of size 0, "free" the origin block and return no new address
   }
 
-  header_s* old_header = (header_s*)((intptr_t)ptr - sizeof(header_s));
-  size_t    old_size   = old_header->size;
-
+  header_s* old_header = (header_s*)((intptr_t)ptr - sizeof(header_s)); //calculate the location of the original block header
+  
+  size_t    old_size   = old_header->size; //and retrieve the size
+  // DEBUG("realloc detected old size: ",(int) old_size);
   if (size <= old_size) {
-    return ptr;
+    return ptr; //if original size exceeds the requested size, do nothing
   }
 
-  void* new_ptr = malloc(size);
-  if (new_ptr != NULL) {
-    memcpy(new_ptr, ptr, old_size);
+  void* new_ptr = malloc(size); //else, allocate a new block in the "front" of the heap
+  if (new_ptr != NULL) { 
+    memcpy(new_ptr, ptr, old_size); //if this new allocation does not exceed the boundary, copy the contents of the old block into the new 
     free(ptr);
   }
   return new_ptr;
