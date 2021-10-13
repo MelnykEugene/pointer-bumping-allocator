@@ -134,7 +134,7 @@ void* malloc (size_t size) {
   size_t    total_size = size + sizeof(header_s); //calculate the total size allocated, which includes both header and the requested block
   header_s* header_ptr = (header_s*)free_addr; //set the header pointer to the first free address in the heap
   void*     block_ptr  = (void*)(free_addr + sizeof(header_s)); //calculate the block pointer using header size 
-  int align =(4 - (intptr_t)block_ptr %4)%4;
+  int align =(4 - (intptr_t)block_ptr %4)%4; //JK: Should be aligned by 16 instead of 4
   // DEBUG("remainder mod 4, offset:",(intptr_t) block_ptr%4 ,align);
   header_ptr = (header_s*)(header_ptr+align);
   block_ptr=(void*)(block_ptr+align);

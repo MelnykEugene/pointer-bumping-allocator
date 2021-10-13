@@ -1,0 +1,5 @@
+rm -rf *.o *.so memtest
+gcc -std=gnu99 -ggdb -Wall -c pb-alloc.c
+gcc -std=gnu99 -ggdb -Wall -c safeio.c
+gcc -std=gnu99 -ggdb -Wall -fPIC -shared -o libpb.so pb-alloc.o safeio.o
+gcc -std=gnu99 -ggdb -Wall -o memtest memtest.c

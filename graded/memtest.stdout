@@ -1,0 +1,27 @@
+x = 0x7fb6d039b008
+y = 0x7fb6d039b028
+z = 0x7fb6d039b044
+
+testing whether a new block is allocated only when the size exceeds that of the old one:
+x = 0x7fb6d039c074
+reallocating x with SMALLER size
+new allocation goes to 0x7fb6d039c074
+reallocating x with LARGER size
+new allocation goes to 0x7fb6d039c09c
+
+testing whether the contents are copied correctly:
+allocated 5 bytes for the string: abcd
+reallocating 8 bytes
+adding another two letter to the string...
+result: abcdef
+the original four letters were copied successfully
+
+testing block alignment
+allocating 5 bytes
+aligned = true
+allocating 17 bytes
+aligned = true
+allocating 4 bytes
+aligned = true
+allocating 1 byte
+aligned = true
